@@ -27,10 +27,27 @@ export default function RootLayout() {
     return null
   }
 
+  const screens = [
+    {
+      name: '(tabs)',
+      options: {
+        headerShown: false,
+      },
+    },
+    {
+      name: '(auth)',
+      options: {
+        headerShown: false,
+      },
+    },
+  ]
+
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
+        {screens.map((screen) => (
+          <Stack.Screen key={screen.name} {...screen} />
+        ))}
       </Stack>
     </ThemeProvider>
   )
