@@ -12,10 +12,6 @@ function PendingIcon({ color }: { color: string }) {
   return <AntDesign name="clockcircleo" size={20} color={color} />
 }
 
-// function InspectIcon({ color }: { color: string }) {
-//   return <AntDesign name="camera" size={20} color={color} />
-// }
-
 function DeletedIcon({ color }: { color: string }) {
   return <Feather name="trash-2" size={20} color={color} />
 }
