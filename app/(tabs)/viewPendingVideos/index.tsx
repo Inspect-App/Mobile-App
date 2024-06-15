@@ -44,9 +44,8 @@ function Simple() {
       <View className="h-[500px] w-full">
         {videos.map((video) => {
           return (
-            <>
+            <View key={video.title}>
               <TinderCard
-                key={video.title}
                 onSwipe={(dir) => {
                   swiped(dir, video.title)
                 }}
@@ -65,7 +64,7 @@ function Simple() {
                   </View>
                 </View>
               </TinderCard>
-            </>
+            </View>
           )
         })}
       </View>
