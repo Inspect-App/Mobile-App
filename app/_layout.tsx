@@ -5,9 +5,12 @@ import * as SplashScreen from 'expo-splash-screen'
 import { useEffect } from 'react'
 import 'react-native-reanimated'
 import '../global.css'
+import { Ionicons } from '@expo/vector-icons'
 
 import { useColorScheme } from '@/hooks/useColorScheme'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { TouchableOpacity } from 'react-native'
+import { useNavigation } from '@react-navigation/native'
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync()
@@ -36,9 +39,17 @@ export default function RootLayout() {
       },
     },
     {
-      name: '(auth)',
+      name: 'inspect/index',
       options: {
-        headerShown: false,
+        headerTitle: 'Inspect',
+        headerLeft: BackIcon,
+      },
+    },
+    {
+      name: 'inspectingMode/index',
+      options: {
+        headerTitle: 'Inspecting Mode',
+        headerLeft: BackIcon,
       },
     },
   ]
@@ -53,5 +64,20 @@ export default function RootLayout() {
         </Stack>
       </GestureHandlerRootView>
     </ThemeProvider>
+  )
+}
+
+function BackIcon() {
+  const navigation = useNavigation()
+  const colorScheme = useColorScheme()
+
+  return (
+    <TouchableOpacity onPress={() => navigation.goBack()}>
+      <Ionicons
+        name="arrow-back-outline"
+        size={24}
+        color={colorScheme === 'dark' ? 'white' : 'black'}
+      />
+    </TouchableOpacity>
   )
 }
