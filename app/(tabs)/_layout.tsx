@@ -52,7 +52,7 @@ export default function RootLayout() {
       },
     },
     {
-      name: 'saved/index',
+      name: 'saved',
       options: {
         headerTitle: 'Saved',
         tabBarIcon: SavedIcon,
