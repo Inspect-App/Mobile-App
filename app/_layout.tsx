@@ -11,6 +11,7 @@ import { useColorScheme } from '@/hooks/useColorScheme'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { TouchableOpacity } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
+import ReactQueryClientProvider from '@/providers/ReactQueryProvider'
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync()
@@ -57,11 +58,13 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <GestureHandlerRootView>
-        <Stack>
-          {screens.map((screen) => (
-            <Stack.Screen key={screen.name} {...screen} />
-          ))}
-        </Stack>
+        <ReactQueryClientProvider>
+          <Stack>
+            {screens.map((screen) => (
+              <Stack.Screen key={screen.name} {...screen} />
+            ))}
+          </Stack>
+        </ReactQueryClientProvider>
       </GestureHandlerRootView>
     </ThemeProvider>
   )
