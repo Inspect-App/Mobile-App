@@ -1,7 +1,6 @@
 import { ApiResponse, ServerError, ResponseError } from '.'
-import { API_BASE_URL } from '@env'
 
-export const baseUrl = API_BASE_URL ?? 'http://localhost:3200/api/'
+export const baseUrl = process.env.EXPO_PUBLIC_API_BASE_URL
 
 export interface ApiRequestParams {
   queries?: Record<string, string>
