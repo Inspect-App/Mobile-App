@@ -34,6 +34,12 @@ export default function RootLayout() {
 
   const screens = [
     {
+      name: '(auth)/register/index',
+      options: {
+        headerShown: false,
+      },
+    },
+    {
       name: '(tabs)',
       options: {
         headerShown: false,
