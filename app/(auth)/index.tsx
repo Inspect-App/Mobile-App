@@ -1,4 +1,5 @@
 import { Entypo } from '@expo/vector-icons'
+import { router } from 'expo-router'
 import React from 'react'
 import { Text, Image, TextInput, KeyboardAvoidingView, View, TouchableOpacity } from 'react-native'
 
@@ -9,7 +10,7 @@ export default function Page() {
   return (
     <KeyboardAvoidingView
       behavior={'padding'}
-      className="flex h-full flex-col items-center gap-5 bg-light-50 px-10 dark:bg-dark-50"
+      className="flex h-full flex-col items-center justify-center gap-5 bg-light-50 px-10 dark:bg-dark-50"
     >
       <Image source={require('@/assets/images/logo.png')} />
       <Text className="text-2xl font-bold text-light-950 dark:text-dark-950">Create Account</Text>
@@ -27,9 +28,9 @@ export default function Page() {
           <Entypo
             name={showPassword ? 'eye' : 'eye-with-line'}
             onPress={() => setShowPassword(!showPassword)}
-            size={24}
+            size={20}
             color={'#e5dbdb'}
-            className="absolute right-4 top-3"
+            className="absolute right-4 top-4"
           />
         </View>
         <View className="w-full">
@@ -41,13 +42,19 @@ export default function Page() {
           <Entypo
             name={showRepeatPassword ? 'eye' : 'eye-with-line'}
             onPress={() => setShowRepeatPassword(!showPassword)}
-            size={24}
-            className="absolute right-4 top-3"
+            size={20}
+            className="absolute right-4 top-4"
             color={'#e5dbdb'}
           />
         </View>
       </View>
-      <TouchableOpacity className="w-full rounded-xl bg-[#F20D0D] p-4">
+      <TouchableOpacity
+        className="w-full rounded-xl bg-[#F20D0D] p-4"
+        onPress={() => {
+          // Navigate to OTP screen
+          router.push('OTP')
+        }}
+      >
         <Text className="text-center font-bold text-white">Continue</Text>
       </TouchableOpacity>
     </KeyboardAvoidingView>
