@@ -1,6 +1,6 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native'
 import { useFonts } from 'expo-font'
-import { Stack } from 'expo-router'
+import { Redirect, Slot, Stack, useRootNavigationState } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { useEffect } from 'react'
 import 'react-native-reanimated'
@@ -12,8 +12,10 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { TouchableOpacity } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import ReactQueryClientProvider from '@/providers/ReactQueryProvider'
+import { AuthProvider } from '@/providers/AuthProvider'
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
+
 SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
@@ -32,55 +34,51 @@ export default function RootLayout() {
     return null
   }
 
-  const screens = [
-    {
-      name: '(tabs)',
-      options: {
-        headerShown: false,
-      },
-    },
-    {
-      name: 'inspect/index',
-      options: {
-        headerTitle: 'Inspect',
-        headerLeft: BackIcon,
-      },
-    },
-    {
-      name: 'inspectingMode/index',
-      options: {
-        headerTitle: 'Inspecting Mode',
-        headerLeft: BackIcon,
-      },
-    },
-  ]
+  // const screens = [
+  //   {
+  //     name: '(auth)/index',
+  //     options: {
+
+  //       headerShown: false,
+  //     },
+  //   },
+  //   {
+  //     name: '(tabs)',
+  //     options: {
+  //       headerShown: false,
+  //     },
+  //   },
+  //   {
+  //     name: 'inspect/index',
+  //     options: {
+  //       headerTitle: 'Inspect',
+  //       headerLeft: BackIcon,
+  //     },
+  //   },
+  //   {
+  //     name: 'inspectingMode/index',
+  //     options: {
+  //       headerTitle: 'Inspecting Mode',
+  //       headerLeft: BackIcon,
+  //     },
+  //   }
+
+  // ]
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <GestureHandlerRootView>
         <ReactQueryClientProvider>
-          <Stack>
+          {/* <Stack>
             {screens.map((screen) => (
               <Stack.Screen key={screen.name} {...screen} />
             ))}
-          </Stack>
+          </Stack> */}
+          <AuthProvider>
+            <Slot />
+          </AuthProvider>
         </ReactQueryClientProvider>
       </GestureHandlerRootView>
     </ThemeProvider>
-  )
-}
-
-function BackIcon() {
-  const navigation = useNavigation()
-  const colorScheme = useColorScheme()
-
-  return (
-    <TouchableOpacity onPress={() => navigation.goBack()}>
-      <Ionicons
-        name="arrow-back-outline"
-        size={24}
-        color={colorScheme === 'dark' ? 'white' : 'black'}
-      />
-    </TouchableOpacity>
   )
 }

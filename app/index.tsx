@@ -1,34 +1,67 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { Redirect, Stack, useNavigation } from 'expo-router'
+import { Text, TouchableOpacity } from 'react-native'
 
-export default function Page() {
+import { useAuth } from '@/providers/AuthProvider'
+
+import { useColorScheme } from '@/hooks/useColorScheme'
+import { Ionicons } from '@expo/vector-icons'
+export default function Index() {
+  const { tokens, isLoading, signOut } = useAuth()
+
+  if (isLoading) {
+    return <Text>Loading...</Text>
+  }
+
+  if (tokens) {
+    console.log(tokens)
+    //  signOut()
+
+    return <Redirect href="(auth)" />
+  }
+
+  const screens = [
+    {
+      name: '(tabs)',
+      options: {
+        headerShown: false,
+      },
+    },
+    {
+      name: 'inspect/index',
+      options: {
+        headerTitle: 'Inspect',
+        headerLeft: BackIcon,
+      },
+    },
+    {
+      name: 'inspectingMode/index',
+      options: {
+        headerTitle: 'Inspecting Mode',
+        headerLeft: BackIcon,
+      },
+    },
+  ]
+
   return (
-    <View style={styles.container}>
-      <View style={styles.main}>
-        <Text style={styles.title}>Hello World</Text>
-        <Text style={styles.subtitle}>This is the first page of your app.</Text>
-      </View>
-    </View>
+    <Stack>
+      {screens.map((screen) => (
+        <Stack.Screen key={screen.name} {...screen} />
+      ))}
+    </Stack>
   )
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 24,
-  },
-  main: {
-    flex: 1,
-    justifyContent: 'center',
-    maxWidth: 960,
-    marginHorizontal: 'auto',
-  },
-  title: {
-    fontSize: 64,
-    fontWeight: 'bold',
-  },
-  subtitle: {
-    fontSize: 36,
-    color: '#38434D',
-  },
-})
+function BackIcon() {
+  const navigation = useNavigation()
+  const colorScheme = useColorScheme()
+
+  return (
+    <TouchableOpacity onPress={() => navigation.goBack()}>
+      <Ionicons
+        name="arrow-back-outline"
+        size={24}
+        color={colorScheme === 'dark' ? 'white' : 'black'}
+      />
+    </TouchableOpacity>
+  )
+}

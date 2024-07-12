@@ -62,6 +62,8 @@ export abstract class AbstractApi<T> {
 
       if (!response.ok) {
         const errorBody = await response.json()
+        console.log(errorBody)
+
         throw new ServerError(errorBody as ResponseError)
       }
 
