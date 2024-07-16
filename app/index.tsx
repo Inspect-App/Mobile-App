@@ -5,6 +5,7 @@ import { useAuth } from '@/providers/AuthProvider'
 
 import { useColorScheme } from '@/hooks/useColorScheme'
 import { Ionicons } from '@expo/vector-icons'
+import Auth from './(auth)/index'
 export default function Index() {
   const { tokens, isLoading, signOut } = useAuth()
 
@@ -12,11 +13,8 @@ export default function Index() {
     return <Text>Loading...</Text>
   }
 
-  if (tokens) {
-    console.log(tokens)
-    //  signOut()
-
-    return <Redirect href="(auth)" />
+  if (!tokens) {
+    return <Auth />
   }
 
   const screens = [

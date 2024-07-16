@@ -31,7 +31,12 @@ export class ServerError {
     this.message = this.getDisplayErrorMessage()
     this.status = this.error.error.status ?? this.error.error.code ?? 'Unknown Error Status'
     // transform timestamp to Date object
-    this.timestamp = new Date(this.error.timestamp).toISOString()
+    console.log(this.error.timestamp)
+    try {
+      this.timestamp = new Date(this.error.timestamp).toISOString()
+    } catch (e) {
+      console.log(e, this.error)
+    }
   }
 
   private getDisplayErrorMessage() {

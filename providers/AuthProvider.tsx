@@ -3,7 +3,7 @@ import { useStorageState } from '../hooks/useStorageState'
 import { AuthApi } from '@/api/auth/AuthApi'
 
 const AuthContext = React.createContext<{
-  signIn: (signInDto: { email: string; password: string }) => void
+  signIn: (signInDto: { email: string; password: string }) => Promise<void>
   signOut: () => void
   tokens?: {
     accessToken: string
@@ -11,7 +11,7 @@ const AuthContext = React.createContext<{
   } | null
   isLoading: boolean
 }>({
-  signIn: () => null,
+  signIn: () => Promise.resolve(),
   signOut: () => null,
   tokens: null,
   isLoading: false,
@@ -37,7 +37,7 @@ export function AuthProvider(props: React.PropsWithChildren) {
     <AuthContext.Provider
       value={{
         signIn: (signInDto: { email: string; password: string }) => {
-          authApi
+          return authApi
             .login(signInDto)
             .then((response) => {
               if (response.payload) {
@@ -45,7 +45,7 @@ export function AuthProvider(props: React.PropsWithChildren) {
               }
             })
             .catch((error) => {
-              console.log(error)
+              throw error
             })
         },
         signOut: () => {

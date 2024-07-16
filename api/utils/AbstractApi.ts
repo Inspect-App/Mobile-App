@@ -1,4 +1,4 @@
-import { ApiResponse, ServerError, ResponseError } from '.'
+import { ApiResponse, ServerError, ResponseError } from './index'
 
 export const baseUrl = process.env.EXPO_PUBLIC_API_BASE_URL
 
@@ -62,8 +62,6 @@ export abstract class AbstractApi<T> {
 
       if (!response.ok) {
         const errorBody = await response.json()
-        console.log(errorBody)
-
         throw new ServerError(errorBody as ResponseError)
       }
 
