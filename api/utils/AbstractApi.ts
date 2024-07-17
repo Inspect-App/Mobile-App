@@ -1,4 +1,4 @@
-import { ApiResponse, ServerError, ResponseError } from '.'
+import { ApiResponse, ServerError, ResponseError } from './index'
 
 export const baseUrl = process.env.EXPO_PUBLIC_API_BASE_URL
 
