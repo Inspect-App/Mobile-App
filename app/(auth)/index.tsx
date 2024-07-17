@@ -10,7 +10,6 @@ import {
   Platform,
 } from 'react-native'
 import React from 'react'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Link } from 'expo-router'
 import { useAuth } from '@/providers/AuthProvider'
 import { useForm, SubmitHandler, Controller } from 'react-hook-form'
