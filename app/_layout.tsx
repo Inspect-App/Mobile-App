@@ -36,17 +36,18 @@ export default function RootLayout() {
 
   const screens = [
     {
-      name: '(auth)',
+      name: 'tabs',
       options: {
         headerShown: false,
       },
     },
     {
-      name: '(tabs)',
+      name: '(auth)',
       options: {
         headerShown: false,
       },
     },
+
     {
       name: 'inspect/index',
       options: {
@@ -67,16 +68,30 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <GestureHandlerRootView>
         <ReactQueryClientProvider>
-          {/* <Stack>
-            {screens.map((screen) => (
-              <Stack.Screen key={screen.name} {...screen} />
-            ))}
-          </Stack> */}
           <AuthProvider>
-            <Slot />
+            <Stack>
+              {screens.map((screen) => (
+                <Stack.Screen key={screen.name} {...screen} />
+              ))}
+            </Stack>
           </AuthProvider>
         </ReactQueryClientProvider>
       </GestureHandlerRootView>
     </ThemeProvider>
+  )
+}
+
+function BackIcon() {
+  const navigation = useNavigation()
+  const colorScheme = useColorScheme()
+
+  return (
+    <TouchableOpacity onPress={() => navigation.goBack()}>
+      <Ionicons
+        name="arrow-back-outline"
+        size={24}
+        color={colorScheme === 'dark' ? 'white' : 'black'}
+      />
+    </TouchableOpacity>
   )
 }

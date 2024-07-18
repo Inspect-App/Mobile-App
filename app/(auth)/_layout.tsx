@@ -1,14 +1,17 @@
-import { Stack } from 'expo-router'
+import { useAuth } from '@/providers/AuthProvider'
+import { Redirect, Stack, router } from 'expo-router'
 
 export default function RootLayout() {
   const tabs = [
     {
-      name: 'index',
-    },
-    {
       name: 'OTP/index',
     },
+    {
+      name: 'index',
+    },
   ]
+
+  const { user } = useAuth()
 
   return (
     <Stack>

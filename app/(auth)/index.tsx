@@ -10,7 +10,7 @@ import {
   Platform,
 } from 'react-native'
 import React from 'react'
-import { Link } from 'expo-router'
+import { Link, router } from 'expo-router'
 import { useAuth } from '@/providers/AuthProvider'
 import { useForm, SubmitHandler, Controller } from 'react-hook-form'
 import { ServerError } from '@/api/utils/'
@@ -24,7 +24,7 @@ export default function Index() {
   //     const paddingTop = useSafeAreaInsets().top
   //  console.log(`pt-[${paddingTop + 40}px]`)
 
-  const { signIn } = useAuth()
+  const { signIn, user } = useAuth()
   const {
     register,
     handleSubmit,
@@ -35,7 +35,12 @@ export default function Index() {
   } = useForm<FormData>()
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     try {
-      await signIn(data)
+      const isVerified = await signIn(data)
+      if (isVerified) {
+        router.replace('tabs')
+      } else {
+        router.replace('(auth)/OTP')
+      }
     } catch (error) {
       const e = error as ServerError
       setError('root', {
@@ -44,6 +49,11 @@ export default function Index() {
       })
     }
   }
+
+  if (user && !user.isVerified) {
+    router.replace('(auth)/OTP')
+  }
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}

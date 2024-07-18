@@ -1,5 +1,5 @@
 import { ApiResponse, ServerError, ResponseError } from './index'
-
+import * as SecureStore from 'expo-secure-store'
 export const baseUrl = process.env.EXPO_PUBLIC_API_BASE_URL
 
 export interface ApiRequestParams {
@@ -10,14 +10,11 @@ export interface ApiRequestParams {
 
 export abstract class AbstractApi<T> {
   readonly path: string
-  //   readonly secure: boolean
+  readonly secure: boolean
 
-  constructor(
-    path: string
-    // secure = true
-  ) {
+  constructor(path: string, secure = true) {
     this.path = path
-    // this.secure = secure
+    this.secure = secure
   }
 
   protected async doFetch(requestParams?: ApiRequestParams): Promise<ApiResponse<T | T[]>> {
@@ -33,21 +30,22 @@ export abstract class AbstractApi<T> {
     }
     let accessToken: string | undefined
 
-    // if (this.secure) {
-    //   accessToken = await getAccessTokenVerifiedOrRefreshIfNeeded()
+    if (this.secure) {
+      const tokens = await SecureStore.getItemAsync('tokens')
+      accessToken = tokens ? JSON.parse(tokens).accessToken : undefined
 
-    //   if (!accessToken) {
-    //     throw new ServerError({
-    //       error: {
-    //         message: 'Unauthorized',
-    //         response: 'Unauthorized',
-    //         name: 'Unauthorized',
-    //         status: 401,
-    //       },
-    //       timestamp: new Date().getTime(),
-    //     })
-    //   }
-    // }
+      if (!accessToken) {
+        throw new ServerError({
+          error: {
+            message: 'Unauthorized',
+            response: 'Unauthorized',
+            name: 'Unauthorized',
+            status: 401,
+          },
+          timestamp: new Date().getTime(),
+        })
+      }
+    }
 
     try {
       const response = await fetch(url, {

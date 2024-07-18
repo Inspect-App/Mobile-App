@@ -1,20 +1,25 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useStorageState } from '../hooks/useStorageState'
-import { AuthApi } from '@/api/auth/AuthApi'
+import { AuthApi, User } from '@/api/auth/AuthApi'
+import { UserApi } from '@/api/auth/UserApi'
 
 const AuthContext = React.createContext<{
-  signIn: (signInDto: { email: string; password: string }) => Promise<void>
+  signIn: (signInDto: { email: string; password: string }) => Promise<boolean | undefined>
   signOut: () => void
+  verify: (verifyDto: { email: string; verificationCode: string }) => Promise<void>
   tokens?: {
     accessToken: string
     refreshToken: string
   } | null
   isLoading: boolean
+  user: User
 }>({
-  signIn: () => Promise.resolve(),
+  signIn: () => Promise.resolve(undefined),
   signOut: () => null,
   tokens: null,
   isLoading: false,
+  user: null,
+  verify: () => Promise.resolve(),
 })
 
 // This hook can be used to access the user info.
@@ -31,17 +36,64 @@ export function useAuth() {
 
 export function AuthProvider(props: React.PropsWithChildren) {
   const [[isLoading, tokens], setTokens] = useStorageState('tokens')
+  const [user, setUser] = React.useState<User>(null)
+
+  useEffect(() => {
+    if (tokens && !user) {
+      const userApi = new UserApi()
+      userApi
+        .getMe()
+        .then((response) => {
+          if (response.payload) {
+            setUser(response.payload)
+          }
+        })
+        .catch((error) => {
+          console.log('error', error)
+        })
+    }
+  }, [tokens, user])
 
   const authApi = new AuthApi()
   return (
     <AuthContext.Provider
       value={{
+        verify: (verifyDto: { email: string; verificationCode: string }) => {
+          return authApi
+            .verify(verifyDto)
+            .then((response) => {
+              if (response.payload) {
+                setTokens(
+                  JSON.stringify({
+                    accessToken: response.payload.accessToken,
+                    refreshToken: response.payload.refreshToken,
+                  })
+                )
+
+                setUser(response.payload.user)
+              }
+            })
+            .catch((error) => {
+              throw error
+            })
+        },
         signIn: (signInDto: { email: string; password: string }) => {
           return authApi
             .login(signInDto)
             .then((response) => {
               if (response.payload) {
-                setTokens(JSON.stringify(response.payload))
+                setTokens(
+                  JSON.stringify({
+                    accessToken: response.payload.accessToken,
+                    refreshToken: response.payload.refreshToken,
+                  })
+                )
+
+                setUser(response.payload.user)
+                if (!response.payload.user.isVerified) {
+                  return false
+                }
+                return true
               }
             })
             .catch((error) => {
@@ -54,6 +106,7 @@ export function AuthProvider(props: React.PropsWithChildren) {
 
         tokens: tokens ? JSON.parse(tokens) : null,
         isLoading,
+        user,
       }}
     >
       {props.children}

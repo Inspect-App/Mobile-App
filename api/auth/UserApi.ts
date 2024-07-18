@@ -24,42 +24,32 @@ export type User = {
   refreshToken: string
   createdAt: string
   updatedAt: string
-} | null
-
-export interface AuthResponse {
-  accessToken: string
-  refreshToken: string
-  user: User
 }
-export class AuthApi extends AbstractApi<AuthResponse> {
+
+export class UserApi extends AbstractApi<User> {
   constructor() {
-    super('auth', false)
+    super('auth')
   }
 
-  async login(loginDto: { email: string; password: string }): Promise<ApiResponse<AuthResponse>> {
+  //   async login(loginDto: { email: string; password: string }): Promise<ApiResponse<User>> {
+  //     const data = (await this.doFetch({
+  //       requestOptions: {
+  //         method: 'POST',
+  //         body: JSON.stringify(loginDto),
+  //       },
+  //       pathExtension: 'login',
+  //     })) as ApiResponse<AuthResponse>
+
+  //     return data
+  //   }
+
+  async getMe(): Promise<ApiResponse<User>> {
     const data = (await this.doFetch({
       requestOptions: {
-        method: 'POST',
-        body: JSON.stringify(loginDto),
+        method: 'GET',
       },
-      pathExtension: 'login',
-    })) as ApiResponse<AuthResponse>
-
-    return data
-  }
-
-  async verify(verifyDto: {
-    email: string
-    verificationCode: string
-  }): Promise<ApiResponse<AuthResponse>> {
-    const data = (await this.doFetch({
-      requestOptions: {
-        method: 'POST',
-        body: JSON.stringify(verifyDto),
-      },
-      pathExtension: 'verify',
-    })) as ApiResponse<AuthResponse>
-
+      pathExtension: 'me',
+    })) as ApiResponse<User>
     return data
   }
 }
