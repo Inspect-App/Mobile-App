@@ -1,9 +1,10 @@
-import { Redirect, Tabs } from 'expo-router'
+import { Redirect, router, Tabs } from 'expo-router'
 import { Feather } from '@expo/vector-icons'
 import { AntDesign } from '@expo/vector-icons'
 import { FontAwesome } from '@expo/vector-icons'
 import { useColorScheme } from '@/hooks/useColorScheme'
 import { useAuth } from '@/providers/AuthProvider'
+import { useEffect } from 'react'
 
 function HomeIcon({ color }: { color: string }) {
   return <Feather name="home" size={20} color={color} />
@@ -23,10 +24,8 @@ function SavedIcon({ color }: { color: string }) {
 
 export default function RootLayout() {
   const colorScheme = useColorScheme()
-  const { user } = useAuth()
-  if (!user) {
-    return <Redirect href={'auth/index'} />
-  }
+  const { user, tokens, isLoading, signOut } = useAuth()
+
   const tabs = [
     {
       name: 'index',

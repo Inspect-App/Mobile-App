@@ -110,7 +110,7 @@ const Index = () => {
             <OtpTextInput
               otp={value}
               setOtp={onChange}
-              digits={5}
+              digits={6}
               style={styles.OtpTextInput}
               fontStyle={styles.fontStyle}
               focusedStyle={styles.focusedStyle}

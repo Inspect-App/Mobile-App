@@ -62,4 +62,21 @@ export class AuthApi extends AbstractApi<AuthResponse> {
 
     return data
   }
+
+  async signUp(signUpDto: {
+    email: string
+    password: string
+    firstName: string
+    lastName: string
+  }): Promise<ApiResponse<AuthResponse>> {
+    const data = (await this.doFetch({
+      requestOptions: {
+        method: 'POST',
+        body: JSON.stringify(signUpDto),
+      },
+      pathExtension: 'register',
+    })) as ApiResponse<AuthResponse>
+
+    return data
+  }
 }

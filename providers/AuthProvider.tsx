@@ -13,6 +13,12 @@ const AuthContext = React.createContext<{
   } | null
   isLoading: boolean
   user: User
+  signUp: (signUpDto: {
+    email: string
+    password: string
+    firstName: string
+    lastName: string
+  }) => Promise<boolean | undefined>
 }>({
   signIn: () => Promise.resolve(undefined),
   signOut: () => null,
@@ -20,6 +26,7 @@ const AuthContext = React.createContext<{
   isLoading: false,
   user: null,
   verify: () => Promise.resolve(),
+  signUp: () => Promise.resolve(undefined),
 })
 
 // This hook can be used to access the user info.
@@ -41,6 +48,7 @@ export function AuthProvider(props: React.PropsWithChildren) {
   useEffect(() => {
     if (tokens && !user) {
       const userApi = new UserApi()
+
       userApi
         .getMe()
         .then((response) => {
@@ -90,7 +98,35 @@ export function AuthProvider(props: React.PropsWithChildren) {
                 )
 
                 setUser(response.payload.user)
-                if (!response.payload.user.isVerified) {
+                if (!response.payload.user?.isVerified) {
+                  return false
+                }
+                return true
+              }
+            })
+            .catch((error) => {
+              throw error
+            })
+        },
+        signUp: (signUpDto: {
+          email: string
+          password: string
+          firstName: string
+          lastName: string
+        }) => {
+          return authApi
+            .signUp(signUpDto)
+            .then((response) => {
+              if (response.payload) {
+                setTokens(
+                  JSON.stringify({
+                    accessToken: response.payload.accessToken,
+                    refreshToken: response.payload.refreshToken,
+                  })
+                )
+
+                setUser(response.payload.user)
+                if (!response.payload.user?.isVerified) {
                   return false
                 }
                 return true
