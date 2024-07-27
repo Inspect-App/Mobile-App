@@ -19,6 +19,7 @@ export abstract class AbstractApi<T> {
 
   protected async doFetch(requestParams?: ApiRequestParams): Promise<ApiResponse<T | T[]>> {
     let url = `${baseUrl}${this.path}`
+    console.log(url)
 
     if (requestParams && requestParams.pathExtension) {
       url += `/${requestParams.pathExtension}`
