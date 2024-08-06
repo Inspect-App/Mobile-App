@@ -141,6 +141,7 @@ const Index = () => {
           >
             <Text className="text-center font-bold text-white">Next</Text>
           </TouchableOpacity>
+          
         </View>
       </View>
     </TouchableWithoutFeedback>

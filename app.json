@@ -7,10 +7,13 @@
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
+    "description": "your app desc",
     "splash": {
       "image": "./assets/images/logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
+    
+
     },
     "ios": {
       "supportsTablet": true,
