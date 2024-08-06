@@ -14,14 +14,23 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.selimellieh72.frontend"
+      "bundleIdentifier": "com.selimellieh72.frontend",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app requires access to the camera.",
+        "NSMicrophoneUsageDescription": "This app requires access to the microphone."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.selimellieh72.frontend"
+      "package": "com.selimellieh72.frontend",
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO"
+      ],
+      "minSdkVersion": 26
     },
     "web": {
       "bundler": "metro",
