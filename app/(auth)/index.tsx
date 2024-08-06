@@ -1,147 +1,243 @@
+import React, { useState } from 'react';  // Import useState
 import {
   View,
   Text,
   StyleSheet,
   Image,
   TextInput,
-  Button,
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
-} from 'react-native'
-import React from 'react'
-import { Link, router } from 'expo-router'
-import { useAuth } from '@/providers/AuthProvider'
-import { useForm, SubmitHandler, Controller } from 'react-hook-form'
-import { ServerError } from '@/api/utils/'
+  SafeAreaView,
+  ScrollView
+} from 'react-native';
+import { useForm, SubmitHandler, Controller } from 'react-hook-form';
+import { useAuth } from '@/providers/AuthProvider';
+import { ServerError } from '@/api/utils/';
+import { Link, router } from 'expo-router';
 
 interface FormData {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
-export default function Index() {
-  // get the upper padding for safe area
-  //     const paddingTop = useSafeAreaInsets().top
-  //  console.log(`pt-[${paddingTop + 40}px]`)
 
-  const { signIn, user } = useAuth()
+export default function Index() {
+  const { signIn, user } = useAuth();
   const {
     register,
     handleSubmit,
-    watch,
     control,
     setError,
     formState: { errors },
-  } = useForm<FormData>()
+  } = useForm<FormData>();
+  
+  const [focusedField, setFocusedField] = useState<string | null>(null); // Add state for focused field
+
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     try {
-      const isVerified = await signIn(data)
+      const isVerified = await signIn(data);
       if (isVerified) {
-        router.replace('tabs')
+        router.replace('tabs');
       } else {
-        router.replace('(auth)/OTP')
+        router.replace('(auth)/OTP');
       }
     } catch (error) {
-      const e = error as ServerError
+      const e = error as ServerError;
       setError('root', {
         type: 'manual',
         message: e.message,
-      })
+      });
     }
-  }
+  };
 
   if (user && !user.isVerified) {
-    router.replace('(auth)/OTP')
+    router.replace('(auth)/OTP');
   }
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      className="flex-1"
-    >
-      <View className={'flex-grow pt-[100px]'}>
-        <Image
-          className="w-3/4 self-center"
-          // align self to center
-
-          source={require('../../assets/images/logo.png')}
-        />
-        <Text className="pt-4 text-center text-2xl font-bold">Login to Inspect</Text>
-        <View className="m-4">
-          <Controller
-            control={control}
-            rules={{
-              required: true,
-              pattern: {
-                value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
-                message: 'Invalid email address',
-              },
-            }}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                autoCapitalize="none"
-                placeholder="Email"
-                className="mb-1 w-full rounded-xl border border-light-100 bg-light-200 p-4 dark:border-dark-100"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-              />
+    <SafeAreaView style={styles.container}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollViewContent}
+          keyboardShouldPersistTaps="handled"
+          style={styles.scrollView}
+        >
+          <View style={styles.formContainer}>
+            <Image
+              style={styles.logo}
+              source={require('../../assets/images/logo.png')}
+            />
+            <Text style={styles.title}>Login to Inspect</Text>
+            <Controller
+              control={control}
+              rules={{
+                required: true,
+                pattern: {
+                  value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/,
+                  message: 'Invalid email address',
+                },
+              }}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  autoCapitalize="none"
+                  placeholder="Email"
+                  style={[
+                    styles.input,
+                    focusedField === 'email' && styles.focusedInput // Apply focused style
+                  ]}
+                  placeholderTextColor="#A0A0A0"
+                  onBlur={() => { onBlur(); setFocusedField(null); }}
+                  onFocus={() => setFocusedField('email')}
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
+              name="email"
+            />
+            {errors.email?.message && (
+              <Text style={styles.errorText}>{errors.email?.message}</Text>
             )}
-            name="email"
-          />
-          {errors.email?.message && (
-            <Text className="text-sm text-red-500">{errors.email?.message}</Text>
-          )}
-          <View className="mb-4" />
-
-          <Controller
-            control={control}
-            rules={{
-              required: true,
-              pattern: {
-                value: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/,
-                message:
-                  'Password must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, and 1 number',
-              },
-            }}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                placeholder="Password"
-                className="mb-1 w-full rounded-xl border border-light-100 bg-light-200 p-4 dark:border-dark-100"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                secureTextEntry
-                value={value}
-              />
+            <Controller
+              control={control}
+              rules={{
+                required: true,
+                pattern: {
+                  value: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/,
+                  message:
+                    'Password must contain at least 8 characters, including at least 1 uppercase letter, 1 lowercase letter, and 1 number',
+                },
+              }}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  placeholder="Password"
+                  style={[
+                    styles.input,
+                    focusedField === 'password' && styles.focusedInput // Apply focused style
+                  ]}
+                  placeholderTextColor="#A0A0A0"
+                  onBlur={() => { onBlur(); setFocusedField(null); }}
+                  onFocus={() => setFocusedField('password')}
+                  secureTextEntry
+                  onChangeText={onChange}
+                  value={value}
+                />
+              )}
+              name="password"
+            />
+            {errors.password?.message && (
+              <Text style={styles.errorText}>{errors.password?.message}</Text>
             )}
-            name="password"
-          />
-          {errors.password?.message && (
-            <Text className="text-sm text-red-500">{errors.password?.message}</Text>
-          )}
-          <View className="mb-4" />
-
-          {errors.root?.message && (
-            <Text className="text-sm text-red-500">{errors.root?.message}</Text>
-          )}
-
-          <Link href={''} className="mt-2 text-light-800">
-            Forgot Password?
-          </Link>
-          <TouchableOpacity
-            className="mt-4 w-full rounded-xl bg-[#f20d0d] p-4"
-            onPress={handleSubmit(onSubmit)}
-          >
-            <Text className="text-center font-bold text-white">Sign In</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className="mt-4 w-full rounded-xl bg-[#ff] p-4"
-            onPress={() => router.replace('(auth)/register')}
-          >
-            <Text className="text-center font-bold text-black">Create an Account </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </KeyboardAvoidingView>
-  )
+            {errors.root?.message && (
+              <Text style={styles.errorText}>{errors.root?.message}</Text>
+            )}
+            <Link href={''} style={styles.forgotPassword}>
+              Forgot Password?
+            </Link>
+            <TouchableOpacity
+              style={styles.submitButton}
+              onPress={handleSubmit(onSubmit)}
+            >
+              <Text style={styles.submitButtonText}>Sign In</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.createAccountButton}
+              onPress={() => router.replace('(auth)/register')}
+            >
+              <Text style={styles.createAccountButtonText}>
+                Create an Account
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+  },
+  formContainer: {
+    flex: 1,
+    paddingTop: 24,
+    paddingHorizontal: 16,
+    justifyContent: 'center',
+  },
+  logo: {
+    width: '75%',
+    alignSelf: 'center',
+  },
+  title: {
+    paddingTop: 16,
+    textAlign: 'center',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  input: {
+    width: '90%',
+    marginBottom: 11,
+    height: 55,
+    alignSelf: 'center',
+    borderRadius: 8,
+    borderColor: '#C0C0C0',
+    borderWidth: 1,
+    color: '#ccffff',
+    padding: 12,
+  },
+  focusedInput: { 
+    borderColor: '#f20d0d',
+  },
+  errorText: {
+    fontSize: 14,
+    color: 'red',
+    marginBottom: 8,
+  },
+  submitButton: {
+    marginTop: 16,
+    alignSelf: 'center',
+    borderRadius: 8,
+    backgroundColor: '#f20d0d',
+    borderColor: '#C0C0C0',
+    borderWidth: 1,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    width: '90%',
+  },
+  submitButtonText: {
+    textAlign: 'center',
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  createAccountButton: {
+    marginTop: 16,
+    alignSelf: 'center',
+    borderRadius: 8,
+    borderColor: '#C0C0C0',
+    borderWidth: 1,
+    backgroundColor: '#0099FF',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    width: '90%',
+  },
+  createAccountButtonText: {
+    textAlign: 'center',
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  forgotPassword: {
+    marginTop: 8,
+    textAlign: 'center',
+    color: '#0099FF',
+  },
+});

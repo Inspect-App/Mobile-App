@@ -52,7 +52,7 @@ function Simple() {
                 outOfFrame(video.title);
               }}
             >
-              <View className="absolute left-3 h-[680px] w-[404px] resize rounded-2xl bg-light-100 dark:bg-dark-100">
+              <View className="absolute left-1 right-1 h-[680px] w-[404px] resize rounded-2xl bg-light-100 dark:bg-dark-100">
                 <View className="absolute bottom-0 w-full px-6 py-2">
                   <Text className="text-2xl font-bold text-light-950 dark:text-dark-950">
                     {video.title}
