@@ -1,6 +1,6 @@
 import { useAuth } from '@/providers/AuthProvider'
 import { Redirect, Stack, router } from 'expo-router'
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function RootLayout() {
   const tabs = [
@@ -15,15 +15,18 @@ export default function RootLayout() {
     },
   ]
 
+  const [hasRedirected, setHasRedirected] = useState(false)
   const { user, tokens, isLoading, signOut } = useAuth()
 
   useEffect(() => {
-    if (user && !user.isVerified) {
+    if (user && !user.isVerified && !hasRedirected) {
       router.replace('(auth)/OTP')
-    } else if (user) {
+      setHasRedirected(true)
+    } else if (user && user.isVerified && !hasRedirected) {
       router.replace('tabs')
+      setHasRedirected(true)
     }
-  }, [isLoading, tokens, user])
+  }, [isLoading, tokens, user, hasRedirected])
 
   return (
     <Stack>
