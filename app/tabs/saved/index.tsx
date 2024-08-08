@@ -42,8 +42,8 @@ const Index = () => {
   const colorScheme = useColorScheme()
 
   return (
-    <View className="flex h-full w-full flex-col bg-light-50 dark:bg-dark-50">
-      <View className="h-[80%]">
+    <View className="flex h-full w-full flex-col px-4 bg-light-50 dark:bg-dark-50">
+      <View className="h-[85%]">
         <FlatList
           horizontal={false}
           data={videos}

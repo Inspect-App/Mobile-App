@@ -1,28 +1,272 @@
 import { Link } from 'expo-router'
-import React from 'react'
-import { View, Text, FlatList } from 'react-native'
+import React, { useEffect, useRef, useState } from 'react'
+import { View, Text, FlatList, Alert } from 'react-native'
+import { Camera, runAsync, useCameraDevice, useFrameProcessor } from 'react-native-vision-camera'
+import {
+  Face,
+  useFaceDetector,
+  FaceDetectionOptions,
+} from 'react-native-vision-camera-face-detector'
+import { Worklets } from 'react-native-worklets-core'
+import RNFS from 'react-native-fs'
+import Toast from 'react-native-toast-message'
+import { PERMISSIONS, RESULTS, checkMultiple, requestMultiple } from 'react-native-permissions'
+import { useNavigation } from '@react-navigation/native'
 
-const index = () => {
+const Index = () => {
+  const faceDetectionOptions = useRef<FaceDetectionOptions>({ performanceMode: 'fast' }).current
+  const camera = useRef<Camera>(null)
+  const device = useCameraDevice('back')
+  const [isRecording, setIsRecording] = useState(false)
+  const { detectFaces } = useFaceDetector(faceDetectionOptions)
+  const [permissionsGranted, setPermissionsGranted] = useState(false)
+  const navigation = useNavigation()
+
+  useEffect(() => {
+    const requestPermissions = async () => {
+      try {
+        const cameraStatus = await checkMultiple([
+          PERMISSIONS.ANDROID.CAMERA,
+          PERMISSIONS.IOS.CAMERA,
+        ])
+        const microphoneStatus = await checkMultiple([
+          PERMISSIONS.ANDROID.RECORD_AUDIO,
+          PERMISSIONS.IOS.MICROPHONE,
+        ])
+        const storageStatus = await checkMultiple([
+          PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE,
+          PERMISSIONS.IOS.PHOTO_LIBRARY,
+        ])
+        if (
+          cameraStatus[PERMISSIONS.ANDROID.CAMERA] !== RESULTS.GRANTED &&
+          cameraStatus[PERMISSIONS.IOS.CAMERA] !== RESULTS.GRANTED
+        ) {
+          const cameraPermission = await requestMultiple([
+            PERMISSIONS.ANDROID.CAMERA,
+            PERMISSIONS.IOS.CAMERA,
+          ])
+          if (
+            cameraPermission[PERMISSIONS.ANDROID.CAMERA] !== RESULTS.GRANTED &&
+            cameraPermission[PERMISSIONS.IOS.CAMERA] !== RESULTS.GRANTED
+          ) {
+            Alert.alert('Camera permission is required to use this feature.')
+          }
+        }
+        if (
+          microphoneStatus[PERMISSIONS.ANDROID.RECORD_AUDIO] !== RESULTS.GRANTED &&
+          microphoneStatus[PERMISSIONS.IOS.MICROPHONE] !== RESULTS.GRANTED
+        ) {
+          const microphonePermission = await requestMultiple([
+            PERMISSIONS.ANDROID.RECORD_AUDIO,
+            PERMISSIONS.IOS.MICROPHONE,
+          ])
+          if (
+            microphonePermission[PERMISSIONS.ANDROID.RECORD_AUDIO] !== RESULTS.GRANTED &&
+            microphonePermission[PERMISSIONS.IOS.MICROPHONE] !== RESULTS.GRANTED
+          ) {
+            Alert.alert('Microphone permission is required to record audio.')
+          }
+        }
+        if (
+          storageStatus[PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE] !== RESULTS.GRANTED &&
+          storageStatus[PERMISSIONS.IOS.PHOTO_LIBRARY] !== RESULTS.GRANTED
+        ) {
+          const storagePermission = await requestMultiple([
+            PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE,
+            PERMISSIONS.IOS.PHOTO_LIBRARY,
+          ])
+          if (
+            storagePermission[PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE] !== RESULTS.GRANTED &&
+            storagePermission[PERMISSIONS.IOS.PHOTO_LIBRARY] !== RESULTS.GRANTED
+          ) {
+            Alert.alert('Storage permission is required to save videos.')
+          }
+        }
+        setPermissionsGranted(true)
+        Toast.show({
+          type: 'info',
+          text1: 'Looking for faces',
+          visibilityTime: 3000,
+          autoHide: true,
+        })
+      } catch (error) {
+        Toast.show({
+          type: 'error',
+          text1: (error as Error).message,
+          visibilityTime: 3000,
+          autoHide: true,
+        })
+      }
+    }
+    requestPermissions()
+    const unsubscribeBlur = navigation.addListener('blur', async () => {
+      if (camera.current) {
+        camera.current.cancelRecording()
+      }
+    })
+    return () => {
+      unsubscribeBlur()
+    }
+  }, [navigation])
+
+  const saveToInternalStorage = async (path: string) => {
+    try {
+      const internalPath = `${RNFS.DocumentDirectoryPath}/video_${Date.now()}.mp4`
+      await RNFS.moveFile(path, internalPath)
+      Toast.show({
+        type: 'success',
+        text1: 'Video saved, looking for faces again.',
+        visibilityTime: 3000,
+        autoHide: true,
+      })
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: (error as Error).message,
+        visibilityTime: 3000,
+        autoHide: true,
+      })
+    }
+  }
+
+  const stopRecording = async () => {
+    if (camera.current) {
+      let errorCount = 0
+      try {
+        await camera.current.stopRecording()
+        Toast.show({
+          type: 'info',
+          text1: 'Video recording stopped',
+          visibilityTime: 3000,
+          autoHide: true,
+        })
+        setIsRecording(false)
+      } catch (error) {
+        const errorMessage = (error as Error).message
+        if (errorMessage.includes('A recording is already in progress')) {
+          if (errorCount > 1) {
+            errorCount = errorCount + 1
+          } else {
+            throw error
+          }
+        }
+      }
+    } else {
+      Toast.show({
+        type: 'error',
+        text1: 'Camera reference is null or not recording',
+        visibilityTime: 3000,
+        autoHide: true,
+      })
+    }
+  }
+
+  const startRecording = Worklets.createRunOnJS(async () => {
+    try {
+      let errorCount = 0
+      if (!isRecording && camera.current) {
+        setIsRecording(true)
+        camera.current.startRecording({
+          onRecordingFinished: (video) => {
+            const path = video.path
+            saveToInternalStorage(`file://${path}`)
+          },
+          onRecordingError: (error) => {
+            if (error.message.includes('A recording is already in progress')) {
+              if (errorCount > 1) {
+                errorCount = errorCount + 1
+              } else {
+                throw error
+              }
+            }
+          },
+        })
+        Toast.show({
+          type: 'info',
+          text1: 'Faces detected, Video recording started',
+          visibilityTime: 3000,
+          autoHide: true,
+        })
+        setTimeout(async () => {
+          await stopRecording()
+        }, 6000)
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Camera reference is null or already recording',
+          visibilityTime: 3000,
+          autoHide: true,
+        })
+      }
+    } catch (error) {
+      Toast.show({
+        type: 'error',
+        text1: (error as Error).message,
+        visibilityTime: 3000,
+        autoHide: true,
+      })
+    }
+  })
+
+  const handleDetectedFaces = Worklets.createRunOnJS((faces: Face[]) => {
+    'worklet'
+    if (!isRecording && faces.length > 0) {
+      startRecording()
+    }
+  })
+
+  const frameProcessor = useFrameProcessor(
+    (frame) => {
+      'worklet'
+      try {
+        runAsync(frame, () => {
+          'worklet'
+          if (!isRecording) {
+            const faces = detectFaces(frame)
+            handleDetectedFaces(faces)
+          }
+        })
+      } catch (error) {
+        Toast.show({
+          type: 'error',
+          text1: (error as Error).message,
+          visibilityTime: 3000,
+          autoHide: true,
+        })
+      }
+    },
+    [handleDetectedFaces]
+  )
+
   const ads = [
-    {
-      id: '1',
-      title: 'Watch a 30s ad for 2 mins',
-    },
-    {
-      id: '2',
-      title: 'Watch a 30s ad for 2 mins',
-    },
-    {
-      id: '3',
-      title: 'Watch a 30s ad for 2 mins',
-    },
-    {
-      id: '4',
-      title: 'Watch a 30s ad for 2 mins',
-    },
+    { id: '1', title: 'Watch a 30s ad for 2 mins' },
+    { id: '2', title: 'Watch a 30s ad for 2 mins' },
+    { id: '3', title: 'Watch a 30s ad for 2 mins' },
+    { id: '4', title: 'Watch a 30s ad for 2 mins' },
   ]
+
+  if (!permissionsGranted) {
+    return (
+      <View>
+        <Text>Camera and Microphone permission is required to use this feature.</Text>
+      </View>
+    )
+  }
+
   return (
     <View className="h-full w-full bg-light-50 px-4 dark:bg-dark-50">
+      {device ? (
+        <Camera
+          ref={camera}
+          isActive={true}
+          device={device}
+          frameProcessor={frameProcessor}
+          video={true}
+          audio={true}
+        />
+      ) : (
+        <Text>No Device</Text>
+      )}
       <View className="flex w-full flex-row items-center justify-between py-6">
         <View className="flex flex-col items-center justify-center">
           <View className="rounded-2xl bg-light-100 px-20 py-4 dark:bg-dark-100">
@@ -57,6 +301,7 @@ const index = () => {
           </View>
         </Link>
       </View>
+      <Toast position="bottom" bottomOffset={20} />
     </View>
   )
 }
@@ -70,4 +315,4 @@ function AdItem({ item }: { item: { id: string; title: string } }) {
   )
 }
 
-export default index
+export default Index
