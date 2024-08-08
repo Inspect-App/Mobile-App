@@ -50,21 +50,31 @@ const Index = () => {
   }
 
   const { user, verify } = useAuth()
+
   const onSubmit = async (data: { otp: string }) => {
     try {
+      console.log('Submitting OTP:', data.otp)
+      if (!user) {
+        throw new Error('User is not defined')
+      }
+
       await verify({
-        email: user!.email,
+        email: user.email,
         verificationCode: data.otp,
       })
 
-      router.replace('tabs')
+      // Log the intended navigation path
+      console.log('Navigating to login page')
+      router.replace('tabs') // Adjust this path as needed
+
+      console.log('Verification successful')
     } catch (error) {
       const e = error as ServerError
       setError('root', {
         type: 'manual',
         message: e.message,
       })
-      console.log(e.message)
+      console.log('Verification error:', e.message)
     }
   }
 
@@ -75,7 +85,7 @@ const Index = () => {
       borderRightWidth: 0,
       borderLeftWidth: 0,
       height: 40,
-      color: isDarkMode ? 'white' : 'black', // Set text color based on theme
+      color: isDarkMode ? 'white' : 'black',
     },
     focusedStyle: {
       borderColor: '#5cb85c',
@@ -84,7 +94,25 @@ const Index = () => {
     fontStyle: {
       fontSize: 20,
       fontWeight: 'bold',
-      color: isDarkMode ? 'white' : 'black', // Set font color based on theme
+      color: isDarkMode ? 'white' : 'black',
+    },
+    button: {
+      borderRadius: 8,
+      paddingVertical: 10,
+      paddingHorizontal: 20,
+      marginBottom: 10,
+    },
+    resendButton: {
+      backgroundColor: '#e0e0e0', // Light background for resend button
+      // Smaller padding for resend button
+      paddingVertical: 8,
+      paddingHorizontal: 16,
+    },
+    nextButton: {
+      backgroundColor: '#F20D0D', // Red background for next button
+      // Larger padding for next button
+      paddingVertical: 12,
+      paddingHorizontal: 24,
     },
   })
 
@@ -96,14 +124,6 @@ const Index = () => {
         <Text className="mb-5 mt-5 dark:text-dark-950">
           We sent a 6-digit code to your email. Enter it below.
         </Text>
-        {/* <OtpTextInput
-          otp={otp}
-          setOtp={setOtp}
-          digits={5}
-          style={styles.OtpTextInput}
-          fontStyle={styles.fontStyle}
-          focusedStyle={styles.focusedStyle}
-        /> */}
         <Controller
           control={control}
           render={({ field: { onChange, onBlur, value } }) => (
@@ -121,27 +141,25 @@ const Index = () => {
           defaultValue=""
         />
         {errors.root && <Text className="mt-2 text-sm text-red-500">{errors.root.message}</Text>}
-        <View className="mt-10 flex w-full flex-row justify-around gap-2">
+        <View className="mt-10 flex w-full items-center">
           <TouchableOpacity
-            className={`rounded-xl bg-light-200 p-4 px-16 ${
-              countdown > 0 ? 'opacity-60' : 'opacity-100'
-            }`}
+            style={[styles.button, styles.resendButton, { opacity: countdown > 0 ? 0.6 : 1 }]}
             onPress={handleResendCode}
             disabled={countdown > 0}
           >
             <Text
-              className={`${countdown > 0 ? 'opacity-60' : 'opacity-100'} text-center font-bold`}
+              className="text-center font-bold"
+              style={{ color: countdown > 0 ? '#aaa' : '#000' }}
             >
               {countdown > 0 ? `${countdown} seconds` : 'Resend Code'}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
-            className="rounded-xl bg-[#F20D0D] p-4 px-16"
+            style={[styles.button, styles.nextButton]}
             onPress={handleSubmit(onSubmit)}
           >
             <Text className="text-center font-bold text-white">Next</Text>
           </TouchableOpacity>
-          
         </View>
       </View>
     </TouchableWithoutFeedback>

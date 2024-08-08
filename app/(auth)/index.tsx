@@ -1,4 +1,4 @@
-import React, { useState } from 'react';  // Import useState
+import React, { useState } from 'react' // Import useState
 import {
   View,
   Text,
@@ -9,49 +9,49 @@ import {
   KeyboardAvoidingView,
   Platform,
   SafeAreaView,
-  ScrollView
-} from 'react-native';
-import { useForm, SubmitHandler, Controller } from 'react-hook-form';
-import { useAuth } from '@/providers/AuthProvider';
-import { ServerError } from '@/api/utils/';
-import { Link, router } from 'expo-router';
+  ScrollView,
+} from 'react-native'
+import { useForm, SubmitHandler, Controller } from 'react-hook-form'
+import { useAuth } from '@/providers/AuthProvider'
+import { ServerError } from '@/api/utils/'
+import { Link, router } from 'expo-router'
 
 interface FormData {
-  email: string;
-  password: string;
+  email: string
+  password: string
 }
 
 export default function Index() {
-  const { signIn, user } = useAuth();
+  const { signIn, user } = useAuth()
   const {
     register,
     handleSubmit,
     control,
     setError,
     formState: { errors },
-  } = useForm<FormData>();
-  
-  const [focusedField, setFocusedField] = useState<string | null>(null); // Add state for focused field
+  } = useForm<FormData>()
+
+  const [focusedField, setFocusedField] = useState<string | null>(null) // Add state for focused field
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     try {
-      const isVerified = await signIn(data);
+      const isVerified = await signIn(data)
       if (isVerified) {
-        router.replace('tabs');
+        router.replace('tabs')
       } else {
-        router.replace('(auth)/OTP');
+        router.replace('(auth)/OTP')
       }
     } catch (error) {
-      const e = error as ServerError;
+      const e = error as ServerError
       setError('root', {
         type: 'manual',
         message: e.message,
-      });
+      })
     }
-  };
+  }
 
   if (user && !user.isVerified) {
-    router.replace('(auth)/OTP');
+    router.replace('(auth)/OTP')
   }
 
   return (
@@ -67,10 +67,7 @@ export default function Index() {
           style={styles.scrollView}
         >
           <View style={styles.formContainer}>
-            <Image
-              style={styles.logo}
-              source={require('../../assets/images/logo.png')}
-            />
+            <Image style={styles.logo} source={require('../../assets/images/logo.png')} />
             <Text style={styles.title}>Login to Inspect</Text>
             <Controller
               control={control}
@@ -87,10 +84,13 @@ export default function Index() {
                   placeholder="Email"
                   style={[
                     styles.input,
-                    focusedField === 'email' && styles.focusedInput // Apply focused style
+                    focusedField === 'email' && styles.focusedInput, // Apply focused style
                   ]}
                   placeholderTextColor="#A0A0A0"
-                  onBlur={() => { onBlur(); setFocusedField(null); }}
+                  onBlur={() => {
+                    onBlur()
+                    setFocusedField(null)
+                  }}
                   onFocus={() => setFocusedField('email')}
                   onChangeText={onChange}
                   value={value}
@@ -98,9 +98,7 @@ export default function Index() {
               )}
               name="email"
             />
-            {errors.email?.message && (
-              <Text style={styles.errorText}>{errors.email?.message}</Text>
-            )}
+            {errors.email?.message && <Text style={styles.errorText}>{errors.email?.message}</Text>}
             <Controller
               control={control}
               rules={{
@@ -116,10 +114,14 @@ export default function Index() {
                   placeholder="Password"
                   style={[
                     styles.input,
-                    focusedField === 'password' && styles.focusedInput // Apply focused style
+                    focusedField === 'password' && styles.focusedInput, // Apply focused style
                   ]}
                   placeholderTextColor="#A0A0A0"
-                  onBlur={() => { onBlur(); setFocusedField(null); }}
+                  autoCapitalize="none"
+                  onBlur={() => {
+                    onBlur()
+                    setFocusedField(null)
+                  }}
                   onFocus={() => setFocusedField('password')}
                   secureTextEntry
                   onChangeText={onChange}
@@ -131,31 +133,24 @@ export default function Index() {
             {errors.password?.message && (
               <Text style={styles.errorText}>{errors.password?.message}</Text>
             )}
-            {errors.root?.message && (
-              <Text style={styles.errorText}>{errors.root?.message}</Text>
-            )}
+            {errors.root?.message && <Text style={styles.errorText}>{errors.root?.message}</Text>}
             <Link href={''} style={styles.forgotPassword}>
               Forgot Password?
             </Link>
-            <TouchableOpacity
-              style={styles.submitButton}
-              onPress={handleSubmit(onSubmit)}
-            >
+            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit(onSubmit)}>
               <Text style={styles.submitButtonText}>Sign In</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.createAccountButton}
               onPress={() => router.replace('(auth)/register')}
             >
-              <Text style={styles.createAccountButtonText}>
-                Create an Account
-              </Text>
+              <Text style={styles.createAccountButtonText}>Create an Account</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -175,8 +170,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    width: '75%',
-    alignSelf: 'center',
+    width: '75%', // Keep width as a percentage of the container
+    maxWidth: 300, // Optional: Set a maximum width for the image
+    maxHeight: 100, // Optional: Set a maximum height to prevent overflow
+    alignSelf: 'center', // Center the image horizontally
+    resizeMode: 'contain', // Scale image to fit within the container while preserving aspect ratio
+    marginBottom: 10, // Optional: Add space below the logo
   },
   title: {
     paddingTop: 16,
@@ -195,7 +194,7 @@ const styles = StyleSheet.create({
     color: '#ccffff',
     padding: 12,
   },
-  focusedInput: { 
+  focusedInput: {
     borderColor: '#f20d0d',
   },
   errorText: {
@@ -240,4 +239,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#0099FF',
   },
-});
+})

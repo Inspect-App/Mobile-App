@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 import {
   View,
   Text,
@@ -9,43 +9,43 @@ import {
   ScrollView,
   Image,
   SafeAreaView,
-  StyleSheet
-} from 'react-native';
-import { useForm, SubmitHandler, Controller } from 'react-hook-form';
-import { useAuth } from '@/providers/AuthProvider';
-import { ServerError } from '@/api/utils/';
-import { router } from 'expo-router';
+  StyleSheet,
+} from 'react-native'
+import { useForm, SubmitHandler, Controller } from 'react-hook-form'
+import { useAuth } from '@/providers/AuthProvider'
+import { ServerError } from '@/api/utils/'
+import { router } from 'expo-router'
 
 interface FormData {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
+  email: string
+  password: string
+  firstName: string
+  lastName: string
 }
 
 export default function Index() {
-  const { signUp } = useAuth();
+  const { signUp } = useAuth()
   const {
     register,
     handleSubmit,
     control,
     setError,
     formState: { errors },
-  } = useForm<FormData>();
-  const [focusedField, setFocusedField] = useState<string | null>(null);
+  } = useForm<FormData>()
+  const [focusedField, setFocusedField] = useState<string | null>(null)
 
   const onSubmit: SubmitHandler<FormData> = async (data) => {
     try {
-      await signUp(data);
-      router.replace('(auth)/OTP');
+      await signUp(data)
+      router.replace('(auth)/OTP')
     } catch (error) {
-      const e = error as ServerError;
+      const e = error as ServerError
       setError('root', {
         type: 'manual',
         message: e.message,
-      });
+      })
     }
-  };
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -60,10 +60,7 @@ export default function Index() {
           style={styles.scrollView}
         >
           <View style={styles.formContainer}>
-            <Image
-              style={styles.logo}
-              source={require('../../../assets/images/logo.png')}
-            />
+            <Image style={styles.logo} source={require('../../../assets/images/logo.png')} />
             <Text style={styles.title}>Login to Inspect</Text>
             <Controller
               control={control}
@@ -78,12 +75,12 @@ export default function Index() {
                 <TextInput
                   autoCapitalize="none"
                   placeholder="Email"
-                  style={[
-                    styles.input,
-                    focusedField === 'email' && styles.focusedInput
-                  ]}
+                  style={[styles.input, focusedField === 'email' && styles.focusedInput]}
                   placeholderTextColor="#A0A0A0"
-                  onBlur={() => { onBlur(); setFocusedField(null); }}
+                  onBlur={() => {
+                    onBlur()
+                    setFocusedField(null)
+                  }}
                   onFocus={() => setFocusedField('email')}
                   onChangeText={onChange}
                   value={value}
@@ -91,9 +88,7 @@ export default function Index() {
               )}
               name="email"
             />
-            {errors.email?.message && (
-              <Text style={styles.errorText}>{errors.email?.message}</Text>
-            )}
+            {errors.email?.message && <Text style={styles.errorText}>{errors.email?.message}</Text>}
             <Controller
               control={control}
               rules={{
@@ -107,12 +102,13 @@ export default function Index() {
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
                   placeholder="Password"
-                  style={[
-                    styles.input,
-                    focusedField === 'password' && styles.focusedInput
-                  ]}
+                  style={[styles.input, focusedField === 'password' && styles.focusedInput]}
                   placeholderTextColor="#A0A0A0"
-                  onBlur={() => { onBlur(); setFocusedField(null); }}
+                  autoCapitalize="none"
+                  onBlur={() => {
+                    onBlur()
+                    setFocusedField(null)
+                  }}
                   onFocus={() => setFocusedField('password')}
                   secureTextEntry
                   onChangeText={onChange}
@@ -130,12 +126,12 @@ export default function Index() {
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
                   placeholder="First Name"
-                  style={[
-                    styles.input,
-                    focusedField === 'firstName' && styles.focusedInput
-                  ]}
+                  style={[styles.input, focusedField === 'firstName' && styles.focusedInput]}
                   placeholderTextColor="#A0A0A0"
-                  onBlur={() => { onBlur(); setFocusedField(null); }}
+                  onBlur={() => {
+                    onBlur()
+                    setFocusedField(null)
+                  }}
                   onFocus={() => setFocusedField('firstName')}
                   onChangeText={onChange}
                   value={value}
@@ -152,12 +148,12 @@ export default function Index() {
               render={({ field: { onChange, onBlur, value } }) => (
                 <TextInput
                   placeholder="Last Name"
-                  style={[
-                    styles.input,
-                    focusedField === 'lastName' && styles.focusedInput
-                  ]}
+                  style={[styles.input, focusedField === 'lastName' && styles.focusedInput]}
                   placeholderTextColor="#A0A0A0"
-                  onBlur={() => { onBlur(); setFocusedField(null); }}
+                  onBlur={() => {
+                    onBlur()
+                    setFocusedField(null)
+                  }}
                   onFocus={() => setFocusedField('lastName')}
                   onChangeText={onChange}
                   value={value}
@@ -168,28 +164,18 @@ export default function Index() {
             {errors.lastName?.message && (
               <Text style={styles.errorText}>{errors.lastName?.message}</Text>
             )}
-            {errors.root?.message && (
-              <Text style={styles.errorText}>{errors.root?.message}</Text>
-            )}
-            <TouchableOpacity
-              style={styles.submitButton}
-              onPress={handleSubmit(onSubmit)}
-            >
+            {errors.root?.message && <Text style={styles.errorText}>{errors.root?.message}</Text>}
+            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit(onSubmit)}>
               <Text style={styles.submitButtonText}>Create Account</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.signInButton}
-              onPress={() => router.replace('(auth)')}
-            >
-              <Text style={styles.signInButtonText}>
-                Already Have an Account? Sign In!
-              </Text>
+            <TouchableOpacity style={styles.signInButton} onPress={() => router.replace('(auth)')}>
+              <Text style={styles.signInButtonText}>Already Have an Account? Sign In!</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
@@ -209,8 +195,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    width: '75%',
-    alignSelf: 'center',
+    width: '75%', // Keep width as a percentage of the container
+    maxWidth: 300, // Optional: Set a maximum width for the image
+    maxHeight: 100, // Optional: Set a maximum height to prevent overflow
+    alignSelf: 'center', // Center the image horizontally
+    resizeMode: 'contain', // Scale image to fit within the container while preserving aspect ratio
+    marginBottom: 10, // Optional: Add space below the logo
   },
   title: {
     paddingTop: 16,
@@ -269,4 +259,4 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
   },
-});
+})
