@@ -19,6 +19,13 @@
     "preview4": {
       "distribution": "internal"
     },
-    "production": {}
+    "production": {
+      "android": {
+        "gradleCommand": ":app:assembleRelease -PminSdkVersion=26"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://inspectapi.mooo.com/"
+      }
+    }
   }
 }

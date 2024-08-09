@@ -12,8 +12,6 @@
       "image": "./assets/images/logo.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
-    
-
     },
     "ios": {
       "supportsTablet": true,
@@ -31,9 +29,10 @@
       "package": "com.selimellieh72.frontend",
       "permissions": [
         "CAMERA",
-        "RECORD_AUDIO"
-      ],
-      "minSdkVersion": 26
+        "RECORD_AUDIO",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -41,6 +40,20 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34,
+            "buildToolsVersion": "34.0.0",
+            "minSdkVersion": 26
+          },
+          "ios": {
+            "deploymentTarget": "13.4"
+          }
+        }
+      ],
       "expo-router",
       "expo-secure-store"
     ],
@@ -52,7 +65,7 @@
         "origin": false
       },
       "eas": {
-        "projectId": "acc6ae26-d2d9-4829-b088-0e2f5e28f671"
+        "projectId": "8a25cbba-b085-4b3e-8cae-4c9e672f7acd"
       }
     }
   }
