@@ -1,7 +1,13 @@
 import { Link } from 'expo-router'
 import React, { useEffect, useRef, useState } from 'react'
 import { View, Text, FlatList, Alert } from 'react-native'
-import { Camera, runAsync, useCameraDevice, useFrameProcessor } from 'react-native-vision-camera'
+import {
+  Camera,
+  runAsync,
+  useCameraDevice,
+  useFrameProcessor,
+  Frame,
+} from 'react-native-vision-camera'
 import {
   Face,
   useFaceDetector,
@@ -16,7 +22,7 @@ import { useNavigation } from '@react-navigation/native'
 const Index = () => {
   const faceDetectionOptions = useRef<FaceDetectionOptions>({ performanceMode: 'fast' }).current
   const camera = useRef<Camera>(null)
-  const device = useCameraDevice('back')
+  const device = useCameraDevice('front')
   const [isRecording, setIsRecording] = useState(false)
   const { detectFaces } = useFaceDetector(faceDetectionOptions)
   const [permissionsGranted, setPermissionsGranted] = useState(false)
@@ -33,10 +39,7 @@ const Index = () => {
           PERMISSIONS.ANDROID.RECORD_AUDIO,
           PERMISSIONS.IOS.MICROPHONE,
         ])
-        const storageStatus = await checkMultiple([
-          PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE,
-          PERMISSIONS.IOS.PHOTO_LIBRARY,
-        ])
+
         if (
           cameraStatus[PERMISSIONS.ANDROID.CAMERA] !== RESULTS.GRANTED &&
           cameraStatus[PERMISSIONS.IOS.CAMERA] !== RESULTS.GRANTED
@@ -52,6 +55,7 @@ const Index = () => {
             Alert.alert('Camera permission is required to use this feature.')
           }
         }
+
         if (
           microphoneStatus[PERMISSIONS.ANDROID.RECORD_AUDIO] !== RESULTS.GRANTED &&
           microphoneStatus[PERMISSIONS.IOS.MICROPHONE] !== RESULTS.GRANTED
@@ -65,21 +69,6 @@ const Index = () => {
             microphonePermission[PERMISSIONS.IOS.MICROPHONE] !== RESULTS.GRANTED
           ) {
             Alert.alert('Microphone permission is required to record audio.')
-          }
-        }
-        if (
-          storageStatus[PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE] !== RESULTS.GRANTED &&
-          storageStatus[PERMISSIONS.IOS.PHOTO_LIBRARY] !== RESULTS.GRANTED
-        ) {
-          const storagePermission = await requestMultiple([
-            PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE,
-            PERMISSIONS.IOS.PHOTO_LIBRARY,
-          ])
-          if (
-            storagePermission[PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE] !== RESULTS.GRANTED &&
-            storagePermission[PERMISSIONS.IOS.PHOTO_LIBRARY] !== RESULTS.GRANTED
-          ) {
-            Alert.alert('Storage permission is required to save videos.')
           }
         }
         setPermissionsGranted(true)
@@ -219,20 +208,14 @@ const Index = () => {
     (frame) => {
       'worklet'
       try {
-        runAsync(frame, () => {
-          'worklet'
-          if (!isRecording) {
-            const faces = detectFaces(frame)
+        if (!isRecording) {
+          const faces = detectFaces(frame)
+          if (faces.length > 0) {
             handleDetectedFaces(faces)
           }
-        })
+        }
       } catch (error) {
-        Toast.show({
-          type: 'error',
-          text1: (error as Error).message,
-          visibilityTime: 3000,
-          autoHide: true,
-        })
+        console.error('Frame processing error: ', error)
       }
     },
     [handleDetectedFaces]
@@ -263,6 +246,7 @@ const Index = () => {
           frameProcessor={frameProcessor}
           video={true}
           audio={true}
+          style={{ width: '25%', height: '25%' }}
         />
       ) : (
         <Text>No Device</Text>
@@ -295,7 +279,7 @@ const Index = () => {
         />
       </View>
       <View className="mt-28 flex h-[200px] w-full flex-row items-center justify-center">
-        <Link href="inspectingMode">
+        <Link href={{ pathname: '/inspectingMode' }}>
           <View className="flex w-[300px] items-center justify-center rounded-full bg-[#F20D0D] py-4">
             <Text className="text-xl font-bold text-light-50">Start Inspecting</Text>
           </View>
